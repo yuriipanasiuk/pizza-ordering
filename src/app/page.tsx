@@ -33,7 +33,7 @@ export default function Home() {
             href="tel:+380961234567"
             className="text-4xl underline text-gray-500"
           >
-            +380 96 1234567
+            +38 096 1234567
           </Link>
         </div>
       </section>
