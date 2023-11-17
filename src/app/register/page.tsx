@@ -1,19 +1,29 @@
 "use client";
-import Image from "next/image";
+
 import { FormEvent, useState } from "react";
+import Image from "next/image";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const RegisterPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
-  const handleFormSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const { push } = useRouter();
+
+  const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    fetch("/api/register", {
+    const response = await fetch("/api/register", {
       method: "POST",
       body: JSON.stringify({ email, password }),
       headers: { "Content-Type": "application/json" },
     });
+
+    if (response.ok) {
+      push("/login");
+    }
 
     setEmail("");
     setPassword("");
@@ -38,7 +48,10 @@ const RegisterPage = () => {
         />
         <button type="submit">Register</button>
         <p className="my-4 text-center text-gray-500">or login with provider</p>
-        <button className="flex justify-center gap-4">
+        <button
+          onClick={() => signIn("google", { callbackUrl: "/" })}
+          className="flex justify-center gap-4"
+        >
           <Image
             src="/google-icon.png"
             alt="login with google"
@@ -47,6 +60,12 @@ const RegisterPage = () => {
           />
           Login with Google
         </button>
+        <div className="text-center my-4 text-gray-500 border-t pt-4">
+          Existing acount?{" "}
+          <Link href="/login" className="underline hover:text-primary">
+            Login here &raquo;
+          </Link>
+        </div>
       </form>
     </section>
   );

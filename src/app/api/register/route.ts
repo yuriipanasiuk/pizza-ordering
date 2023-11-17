@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import { User } from "@/app/models/User";
+import bcrypt from "bcryptjs";
+import User from "@/app/models/User";
 
-import { IUserRegister } from "@/interface/user.interface";
+import { IUser } from "@/interface/user.interface";
 
-const DB_HOST = process.env.DB_HOST || "";
+const MONGODB_URI = process.env.MONGODB_URI || "";
 
 export async function POST(req: Request) {
-  mongoose.connect(DB_HOST);
+  await mongoose.connect(MONGODB_URI);
 
-  const body: IUserRegister = await req.json();
+  const body: IUser = await req.json();
   const hashPassword = await bcrypt.hash(body.password, 10);
 
   const createUser = await User.create({

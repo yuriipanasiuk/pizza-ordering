@@ -1,38 +1,52 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+
+import User from "@/app/models/User";
+import clientPromise from "@/app/lib/mongodb";
+
+const MONGODB_URI = process.env.MONGODB_URI || "";
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 
 const handler = NextAuth({
+  adapter: MongoDBAdapter(clientPromise),
+  secret: process.env.SECRET,
+
   providers: [
+    GoogleProvider({
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+    }),
+
     CredentialsProvider({
       name: "Credentials",
+      id: "credentials",
       credentials: {
-        username: {
+        email: {
           label: "Email",
           type: "email",
           placeholder: "example@mail.com",
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        // You need to provide your own logic here that takes the credentials
-        // submitted and returns either a object representing a user or value
-        // that is false/null if the credentials are invalid.
-        // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-        // You can also use the `req` object to obtain additional parameters
-        // (i.e., the request IP address)
-        const res = await fetch("/your/endpoint", {
-          method: "POST",
-          body: JSON.stringify(credentials),
-          headers: { "Content-Type": "application/json" },
-        });
-        const user = await res.json();
 
-        // If no error and we have user data, return it
-        if (res.ok && user) {
-          return user;
-        }
-        // Return null if user data could not be retrieved
-        return null;
+      async authorize(credentials: any) {
+        if (!credentials.email || !credentials.password) return null;
+
+        await mongoose.connect(MONGODB_URI);
+
+        const { email, password } = credentials;
+
+        const user: any = await User.findOne({ email });
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!user || !isPasswordValid) return null;
+
+        return user;
       },
     }),
   ],
