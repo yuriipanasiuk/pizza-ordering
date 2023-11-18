@@ -49,6 +49,7 @@ const RegisterPage = () => {
         <button type="submit">Register</button>
         <p className="my-4 text-center text-gray-500">or login with provider</p>
         <button
+          type="button"
           onClick={() => signIn("google", { callbackUrl: "/" })}
           className="flex justify-center gap-4"
         >

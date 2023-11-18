@@ -4,6 +4,7 @@ mongoose.Promise = global.Promise;
 
 const userSchema = new Schema(
   {
+    name: { type: String },
     email: {
       type: String,
       unique: true,
@@ -13,10 +14,11 @@ const userSchema = new Schema(
       type: String,
       require: [true, "Password id required"],
     },
+    image: { type: String },
   },
   { timestamps: true, versionKey: false }
 );
 
-const User = models.User || model("User", userSchema);
+const User = models?.User || model("User", userSchema);
 
 export default User;

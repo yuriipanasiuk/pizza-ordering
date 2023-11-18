@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "next/legacy/image";
 import Rigth from "../icons/Rigth";
 
 const Hero = () => {
@@ -32,6 +32,7 @@ const Hero = () => {
           alt="pizza"
           layout="fill"
           objectFit="contain"
+          priority
         />
       </div>
     </section>

@@ -10,6 +10,8 @@ const MenuItem = () => {
           src="/pizza.png"
           alt="pizza"
           className="block mx-auto"
+          priority
+          style={{ width: "100%", height: "auto" }}
         />
       </div>
       <h4 className="text-xl font-semibold my-3">title</h4>
