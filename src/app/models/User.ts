@@ -4,7 +4,7 @@ mongoose.Promise = global.Promise;
 
 const userSchema = new Schema(
   {
-    name: { type: String },
+    name: { type: String, default: "" },
     email: {
       type: String,
       unique: true,
@@ -14,7 +14,7 @@ const userSchema = new Schema(
       type: String,
       require: [true, "Password id required"],
     },
-    image: { type: String },
+    image: { type: String, default: "" },
   },
   { timestamps: true, versionKey: false }
 );

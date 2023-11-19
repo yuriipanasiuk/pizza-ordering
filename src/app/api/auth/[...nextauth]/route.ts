@@ -11,12 +11,12 @@ import { databaseConnection } from "../../connect/mongoDb";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 
-const handler = NextAuth({
+export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.SECRET,
 
   session: {
-    strategy: "jwt",
+    // strategy: "jwt" as const,
   },
 
   providers: [
@@ -48,9 +48,10 @@ const handler = NextAuth({
         if (!credentials.email || !credentials.password) return null;
 
         const { email, password } = credentials;
+
         await databaseConnection();
 
-        const user: any = await User.findOne({ email });
+        const user = await User.findOne({ email });
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!user || !isPasswordValid) return null;
@@ -59,6 +60,8 @@ const handler = NextAuth({
       },
     }),
   ],
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
