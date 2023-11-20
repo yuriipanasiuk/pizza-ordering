@@ -13,11 +13,6 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || "";
 
 export const authOptions = {
   adapter: MongoDBAdapter(clientPromise),
-  secret: process.env.SECRET,
-
-  session: {
-    // strategy: "jwt" as const,
-  },
 
   providers: [
     GoogleProvider({
@@ -60,6 +55,10 @@ export const authOptions = {
       },
     }),
   ],
+  secret: process.env.SECRET,
+  session: {
+    // strategy: "jwt" as const,
+  },
 };
 
 const handler = NextAuth(authOptions);

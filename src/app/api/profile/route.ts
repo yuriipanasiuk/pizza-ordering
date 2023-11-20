@@ -7,15 +7,20 @@ import User from "@/app/models/User";
 export async function PUT(req: Request) {
   await databaseConnection();
 
-  const { name } = await req.json();
+  const { name, image } = await req.json();
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
   const { _id } = await User.findOne({ email });
 
-  if (!name || !_id) {
+  if (!name || !_id || !image) {
     return null;
   }
-  await User.findByIdAndUpdate({ _id }, { name }, { new: true });
+
+  console.log("name", name);
+  console.log("id", _id);
+  console.log("image", image);
+
+  await User.findByIdAndUpdate({ _id }, { name, image }, { new: true });
 
   return Response.json(true);
 }

@@ -4,20 +4,23 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import InfoBox from "@/components/layout/InfoBox";
+import SuccessBox from "@/components/layout/SuccessBox";
 
 const ProfilePage = () => {
   const session = useSession();
   const [userName, setUserName] = useState<string>("");
   const [userAvatar, setUserAvatar] = useState<string>("");
-  const [isAvatarLoading, setIsAvatarLoading] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   const { status } = session;
 
   useEffect(() => {
     if (status === "authenticated") {
       setUserName(session.data.user?.name || "");
+      setUserAvatar(session.data.user?.image || "");
     }
   }, [session, status]);
 
@@ -30,7 +33,7 @@ const ProfilePage = () => {
     const response = await fetch("/api/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: userName }),
+      body: JSON.stringify({ name: userName, image: userAvatar }),
     });
 
     setIsSaving(false);
@@ -45,29 +48,22 @@ const ProfilePage = () => {
 
     if (!file) return;
 
-    try {
-      const data = new FormData();
+    const data = new FormData();
 
-      data.set("file", file);
+    data.set("file", file);
+    setIsUploading(true);
+    const res = await fetch("/api/upload", {
+      method: "PATCH",
+      body: data,
+    });
 
-      const res = await fetch("/api/upload", {
-        method: "PATCH",
-        body: data,
-      });
+    if (!res.ok) throw new Error(await res.text());
 
-      if (!res.ok) throw new Error(await res.text());
+    const link = await res.json();
 
-      const { image } = await res.json();
-
-      setUserAvatar(image);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.log(error.message);
-      }
-    }
+    setUserAvatar(link);
+    setIsUploading(false);
   };
-
-  const userImage = session.data?.user?.image;
 
   if (status === "loading") {
     return (
@@ -85,21 +81,14 @@ const ProfilePage = () => {
     <section className="mt-8 mb-8">
       <h1 className="mb-4 text-center text-primary text-4xl">Profile</h1>
       <div className="mx-auto max-w-md  ">
-        {saved && (
-          <h2 className="text-center bg-green-100 p-4 rounded-lg border-1 border-green-300">
-            Profile saved!
-          </h2>
-        )}
-        {isSaving && (
-          <h2 className="text-center bg-blue-100 p-4 rounded-lg border-1 border-blue-300">
-            Saving...
-          </h2>
-        )}
+        {saved && <SuccessBox text="Profile saved!" />}
+        {isSaving && <InfoBox text="Saving..." />}
+        {isUploading && <InfoBox text="Uploading..." />}
         <div className="flex gap-2 items-center">
-          <div className="p-2 rounded-lg">
+          <div className="p-2 rounded-lg max-w-[120px]">
             <Image
               className="rounded-lg mb-1"
-              src={userAvatar || userImage || "/photgraphy.png"}
+              src={userAvatar || "/photgraphy.png"}
               alt="avatar"
               width={100}
               height={100}

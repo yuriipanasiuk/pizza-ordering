@@ -2,19 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { signIn } from "next-auth/react";
+import { FormEvent, useEffect, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { status } = useSession();
+  const { push } = useRouter();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      push("/");
+    }
+  }, [push, status]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    await signIn("credentials", { email, password, callbackUrl: "/" });
-    setEmail("");
-    setPassword("");
+    await signIn("credentials", { email, password });
   };
 
   return (

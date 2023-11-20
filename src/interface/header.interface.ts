@@ -8,3 +8,7 @@ export interface ISectionHeaderProps {
 export interface IChildren {
   children: ReactNode;
 }
+
+export interface IStringProps {
+  text: string;
+}
